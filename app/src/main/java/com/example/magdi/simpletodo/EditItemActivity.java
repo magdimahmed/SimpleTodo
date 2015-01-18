@@ -1,17 +1,33 @@
 package com.example.magdi.simpletodo;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+
 
 
 public class EditItemActivity extends Activity {
+
+    public int position;
+    String itemValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_item);
+        Intent intent = getIntent();
+        if (null != intent) {
+            itemValue = intent.getStringExtra("Item");
+            position = intent.getIntExtra("position", 0);
+        }
+
+        EditText item = (EditText) findViewById(R.id.eteditlv);
+        item.setText(itemValue);
+        item.setSelection(item.getText().length());
     }
 
 
@@ -35,5 +51,15 @@ public class EditItemActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onSave(View view) {
+        EditText etNewItem = (EditText) findViewById(R.id.eteditlv);
+        String itemText = etNewItem.getText().toString();
+        Intent i = new Intent(EditItemActivity.this, MainActivity.class);
+        i.putExtra("Item", itemText);
+        i.putExtra("position", position);
+        setResult(RESULT_OK, i);
+        finish();
     }
 }

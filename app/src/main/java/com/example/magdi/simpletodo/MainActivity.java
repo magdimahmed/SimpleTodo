@@ -1,6 +1,7 @@
 package com.example.magdi.simpletodo;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,25 +10,30 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 
 public class MainActivity extends Activity {
-ArrayList<String> items;
-ArrayAdapter<String> itemAdapter;
-ListView lvItems;
+    ArrayList<String> items;
+    ArrayAdapter<String> itemAdapter;
+    ListView lvItems;
+    private final int REQUEST_CODE = 20;
+    String selectedValue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        lvItems = (ListView)findViewById(R.id.lvItems);
+        lvItems = (ListView) findViewById(R.id.lvItems);
         items = new ArrayList<String>();
-        itemAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,items);
+        itemAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemAdapter);
         items.add("First Item");
         items.add("Second Item");
         setupListViewListener();
+        onListItemClick();
     }
 
 
@@ -53,8 +59,8 @@ ListView lvItems;
         return super.onOptionsItemSelected(item);
     }
 
-    public void onAddItem(View v){
-        EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
+    public void onAddItem(View v) {
+        EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String itemText = etNewItem.getText().toString();
         itemAdapter.add(itemText);
     }
@@ -68,5 +74,49 @@ ListView lvItems;
                 return true;
             }
         });
+    }
+
+    protected void onListItemClick() {
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+
+                selectedValue = items.get(position);
+                int pos = itemAdapter.getPosition(selectedValue);
+                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
+                // put "extras" into the bundle for access in the second activity
+                i.putExtra("position", pos);
+                i.putExtra("Item", selectedValue);
+
+                // brings up the second activity
+                startActivityForResult(i, REQUEST_CODE);
+                Toast.makeText(MainActivity.this, "Item with id [" + id + "] - Position [" + pos + "] - Planet [" + selectedValue + "]", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // REQUEST_CODE is defined above
+        String name = null;
+        int code = 0;
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            // Extract name value from result extras
+
+            if (null != data) {
+                name = data.getStringExtra("Item");
+                code = data.getIntExtra("position", 0);
+            }
+
+            Toast.makeText(this, name + " " + code, Toast.LENGTH_SHORT).show();
+            itemAdapter.remove(selectedValue);
+            System.out.println("+++++++++++++++" + selectedValue);
+            itemAdapter.insert(name, code);
+            itemAdapter.notifyDataSetChanged();
+            // Toast the name to display temporarily on screen
+
+        }
     }
 }
