@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.EditText;
 
 
-
 public class EditItemActivity extends Activity {
 
     public int position;

@@ -12,6 +12,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -26,8 +31,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         lvItems = (ListView) findViewById(R.id.lvItems);
         items = new ArrayList<String>();
+        readItems();
         itemAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemAdapter);
         items.add("First Item");
@@ -63,6 +70,7 @@ public class MainActivity extends Activity {
         EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String itemText = etNewItem.getText().toString();
         itemAdapter.add(itemText);
+        writeItems();
     }
 
     private void setupListViewListener() {
@@ -71,9 +79,31 @@ public class MainActivity extends Activity {
             public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
                 items.remove(pos);
                 itemAdapter.notifyDataSetChanged();
+                writeItems();
                 return true;
             }
         });
+    }
+
+    private void readItems() {
+        File filesDir = getFilesDir();
+        File todoFile = new File(filesDir, "todo.txt");
+        try {
+            items = new ArrayList<String>(FileUtils.readLines(todoFile));
+        } catch (IOException e) {
+            items = new ArrayList<String>();
+        }
+    }
+
+    private void writeItems() {
+        File filesDir = getFilesDir();
+        File todoFile = new File(filesDir, "todo.txt");
+        try {
+            FileUtils.writeLines(todoFile, items);
+        } catch (IOException e) {
+            items = new ArrayList<String>();
+        }
+
     }
 
     protected void onListItemClick() {
@@ -115,6 +145,7 @@ public class MainActivity extends Activity {
             System.out.println("+++++++++++++++" + selectedValue);
             itemAdapter.insert(name, code);
             itemAdapter.notifyDataSetChanged();
+            writeItems();
             // Toast the name to display temporarily on screen
 
         }
